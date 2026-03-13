@@ -1,4 +1,6 @@
-#include "sorts.h"
+#include "../include/Part 2 Algorithms.h"
+
+#include "../include/Advanced Sorts.h"
 #include <vector>
 
 using namespace std;
