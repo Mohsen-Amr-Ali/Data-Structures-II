@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <cstdlib>
+#include <ios>
 
 using namespace std;
 
@@ -50,3 +51,41 @@ int generateRandomIndex(int start, int end) {
 }
 
 //=========== Merge Sort ===========\\
+
+void mergeSort(vector<int> &arr) {
+    int size = arr.size();
+    if (size <= 1) return;
+
+    int middle = size/2;
+
+    vector<int> leftArr(arr.begin(), arr.begin() + middle);
+    vector<int> rightArr(arr.begin() + middle, arr.end());
+
+    mergeSort(leftArr);
+    mergeSort(rightArr);
+
+    merge(leftArr, rightArr, arr);
+}
+
+void merge(vector<int> &leftArr, vector<int> &rightArr, vector<int> &arr) {
+    int leftSize = arr.size()/2;
+    int rightSize = arr.size() - leftSize;
+
+    int lIndex=0, rIndex=0, index=0;
+
+    while (lIndex < leftSize && rIndex < rightSize) {
+        if (leftArr[lIndex] < rightArr[rIndex]) {
+            arr[index++] = leftArr[lIndex++];
+        } else {
+            arr[index++] = rightArr[rIndex++];
+        }
+    }
+
+    while (lIndex < leftSize) {
+        arr[index++] = leftArr[lIndex++];
+    }
+
+    while (rIndex < rightSize) {
+        arr[index++] = rightArr[rIndex++];
+    }
+}
