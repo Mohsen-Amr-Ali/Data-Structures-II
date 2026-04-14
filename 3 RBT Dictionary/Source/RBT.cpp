@@ -1,5 +1,6 @@
 #include "../Headers/RBT.hpp"
 #include <string>
+#include <algorithm>
 
 RBT::RBT() {
     nil = new node;
@@ -142,4 +143,13 @@ int RBT::getSize(node *n) {
 
 int RBT::getSize() {
     return getSize(root);
+}
+
+int RBT::getTreeHeight(node *n) {
+    if (n == nil) return 0;
+    return std::max(getTreeHeight(n->left), getTreeHeight(n->right)) + 1;
+}
+
+int RBT::getTreeHeight() {
+    return getTreeHeight(root);
 }
