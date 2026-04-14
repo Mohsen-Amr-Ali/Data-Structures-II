@@ -24,8 +24,9 @@ class RBT {
 
         void leftRotate(node *x);
         void rightRotate(node *x);
-
         void insertFixup(node *n);
+
+        int checkValidity(node *n);
 
     public:
         RBT();
@@ -35,6 +36,7 @@ class RBT {
         int getTreeHeight();
         int getBlackHeight();
         int getSize();
+        int checkValidity();
 
 };
 

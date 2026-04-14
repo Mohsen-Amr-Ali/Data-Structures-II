@@ -162,3 +162,23 @@ int RBT::getBlackHeight(node *n) {
 int RBT::getBlackHeight() {
     return getBlackHeight(root);
 }
+
+int RBT::checkValidity(node *n) {
+    if (n == nil) return 0;
+
+    int leftBH = checkValidity(n->left);
+    int rightBH = checkValidity(n->right);
+
+    //check for BH violation
+    if (leftBH == -1 || rightBH == -1 || leftBH != rightBH) return -1;
+
+    //check for color violation
+    if (n->color == color::red && (n->left->color == color::red || n->right->color == color::red)) return -1;
+
+    return leftBH + (n->color == color::black ? 1 : 0);
+}
+
+int RBT::checkValidity() {
+    if (root->color == color::red) return -1;
+    return checkValidity(root);
+}
