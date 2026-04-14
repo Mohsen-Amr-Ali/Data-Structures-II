@@ -153,3 +153,12 @@ int RBT::getTreeHeight(node *n) {
 int RBT::getTreeHeight() {
     return getTreeHeight(root);
 }
+
+int RBT::getBlackHeight(node *n) {
+    if (n == nil) return 0;
+    return n->color == color::black ? 1 + getBlackHeight(n->left) : getBlackHeight(n->left);
+}
+
+int RBT::getBlackHeight() {
+    return getBlackHeight(root);
+}
