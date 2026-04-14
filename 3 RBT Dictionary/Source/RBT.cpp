@@ -134,3 +134,12 @@ void RBT::insertFixup(node *n) {
     }
     root->color = color::black;
 }
+
+int RBT::getSize(node *n) {
+    if (n == nil) return 0;
+    return 1 + getSize(n->left) + getSize(n->right);
+}
+
+int RBT::getSize() {
+    return getSize(root);
+}
