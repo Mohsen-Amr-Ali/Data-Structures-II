@@ -96,13 +96,41 @@ void RBT::rightRotate(node *x) {
 }
 
 void RBT::insertFixup(node *n) {
-    if (n->parent->color == color::red) {
+    while (n->parent->color == color::red) {
         node *parent = n->parent;
-        node *grandpa = parent->parent;
-        node *uncle = grandpa->left==parent ? grandpa->right : grandpa->left;
+        node *grandparent = parent->parent;
+        node *uncle = grandparent->left==parent ? grandparent->right : grandparent->left;
 
-        if (uncle->color == color::red) {
-            if ()
+        if (uncle->color == color::red) { //Case 1: uncle is red
+            parent->color = color::black;
+            uncle->color = color::black;
+            grandparent->color = color::red;
+            n=grandparent;
+            continue;
+        }
+
+        if (grandparent->left == parent) {
+            if (parent->right == n) {//bent elbow case, we need to straighten it first
+                //straighten the bend, n and parent switch places. and we switch the pointers as well
+                n = parent; //first we let n point to the parent as well, which is on top
+                leftRotate(parent); //then we switch around the places of the parent (node on top) and the child
+                parent = n->parent; //lastly, since they switched places, the node on the top became the node at the bottom
+                //but it still has both the "n" and the "parent" pointers on it, so we correct the "parent" pointer so
+                //that it points to the node on top
+            }
+            parent->color = color::black; //straight arm case, change colors then rotate grandparent
+            grandparent->color = color::red;
+            rightRotate(grandparent);
+        } else {
+            if (parent->left == n) {
+                n = parent;
+                rightRotate(parent);
+                parent = n->parent;
+            }
+            parent->color = color::black;
+            grandparent->color = color::red;
+            leftRotate(grandparent);
         }
     }
+    root->color = color::black;
 }
