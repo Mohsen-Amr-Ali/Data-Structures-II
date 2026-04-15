@@ -75,4 +75,6 @@ public:
     void pause() const;
 };
 
+void enableWindowsColors();
+
 #endif // CLI_MENU

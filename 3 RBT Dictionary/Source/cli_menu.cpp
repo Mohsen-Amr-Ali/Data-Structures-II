@@ -1,6 +1,7 @@
 #include "../Headers/cli_menu.hpp"
 #include <iostream>
-#include <iomanip>    // For std::setw and std::left
+#include <string>
+#include <vector>
 #include <algorithm>  // For std::max
 #include <conio.h>    // For _getch()
 #include <windows.h>  // For Sleep() and system("cls")
@@ -17,7 +18,6 @@ Menu::Menu(const std::string& title, const std::string& projectName, const std::
     : title(title), projectName(projectName), subjectName(subjectName), currentSelection(0) {}
 
 // --- Modularity Functions ---
-// Allows you to completely change the UI on the fly (e.g., for the Dictionary menu)
 void Menu::clearItems() {
     items.clear();
     currentSelection = 0;
@@ -46,39 +46,62 @@ void Menu::addTeamMember(const std::string& memberInfo) {
     teamMembers.push_back(memberInfo);
 }
 
-// Internal helper to print the dynamic, perfectly aligned boilerplate
+// Internal helper to print the dynamic, perfectly aligned boilerplate with target UI colors
 void Menu::printBoilerplate() const {
-    // Build the Left Column
+    // Build the Left Column texts and colors
     std::vector<std::string> leftLines = {
         "<Mohsen Amr - 9655>",
         subjectName
     };
+    std::vector<std::string> leftColors = {
+        "\x1b[96m", // Turquoise
+        "\x1b[94m"  // Blue
+    };
 
-    // Build the Right Column
+    // Build the Right Column texts and colors
     std::vector<std::string> rightLines;
+    std::vector<std::string> rightColors;
+
     for (const auto& member : teamMembers) {
         rightLines.push_back("<" + member + ">");
+        rightColors.push_back("\x1b[96m"); // Turquoise for names
     }
-    // If there are no extra members, insert an empty line so the project name aligns with subjectName
+
+    // Align project name with subjectName
     if (rightLines.empty()) {
         rightLines.push_back("");
+        rightColors.push_back("");
     }
+
     rightLines.push_back("[" + projectName + "]");
+    rightColors.push_back("\x1b[94m"); // Blue for project name
 
     size_t maxLines = std::max(leftLines.size(), rightLines.size());
 
     std::cout << "\n";
     for (size_t i = 0; i < maxLines; ++i) {
-        std::string leftStr = (i < leftLines.size()) ? leftLines[i] : "";
-        std::string rightStr = (i < rightLines.size()) ? rightLines[i] : "";
+        std::string lText = (i < leftLines.size()) ? leftLines[i] : "";
+        std::string lColor = (i < leftColors.size()) ? leftColors[i] : "";
 
-        // std::setw(40) guarantees the right column stays perfectly locked in place
-        std::cout << std::left << std::setw(40) << leftStr << rightStr << "\n";
+        std::string rText = (i < rightLines.size()) ? rightLines[i] : "";
+        std::string rColor = (i < rightColors.size()) ? rightColors[i] : "";
+
+        // Print left side with color
+        std::cout << lColor << lText << "\x1b[0m";
+
+        // Manual spacing calculation (fixes std::setw bugs with ANSI codes)
+        int spaces = 40 - lText.length();
+        if (spaces > 0) {
+            std::cout << std::string(spaces, ' ');
+        }
+
+        // Print right side with color
+        std::cout << rColor << rText << "\x1b[0m\n";
     }
     std::cout << "\n";
 }
 
-// Internal helper to display the menu options exactly like the C code
+// Internal helper to display the menu options
 void Menu::display() const {
     system("cls"); // Clear screen to redraw cleanly
 
@@ -86,33 +109,39 @@ void Menu::display() const {
 
     // Only print the title if it isn't empty (useful for entirely custom sub-menus)
     if (!title.empty()) {
-        std::cout << " --- " << title << " ---\n\n";
+        std::cout << "\x1b[33m --- " << title << " ---\x1b[0m\n\n"; // Yellow title
     }
 
     for (size_t i = 0; i < items.size(); ++i) {
         if (static_cast<int>(i) == currentSelection) {
-            // Highlighted item perfectly matching your C projects (White Background, Black Text)
+            // Highlighted item (White Background, Black Text)
             std::cout << "\x1b[47;30m" << items[i].text << "\x1b[0m\n";
         } else {
-            // Normal item
+            // Normal item (Unselected)
             std::cout << items[i].text << "\n";
         }
     }
 }
 
-// Confirm Exit logic perfectly mirroring HW5 - 9655.c
+// Confirm Exit logic perfectly mirroring HW5 exit animation
 bool Menu::confirmExit() const {
     system("cls");
-    // Exact colors and prompt from your C files (\x1b[33m for yellow, \x1b[31m for red)
+    printBoilerplate();
+
     std::cout << "\x1b[33mAre you sure you want to exit the program? (Y/N)\n\x1b[31m>>\x1b[0m ";
 
     while (true) {
         char ch = std::toupper(_getch());
         if (ch == 'Y') {
-            std::cout << "\n\x1b[31mExiting program";
-            for (int i = 0; i < 3; i++) {
-                std::cout << ".";
-                Sleep(300); // The exact animated delay
+            // Exact 3-loop exit animation from HW5
+            for (int k = 0; k < 3; k++) {
+                system("cls");
+                std::cout << "\x1b[94mGoodbye!\x1b[0m\n\n";
+                std::cout << "\x1b[31mExiting program";
+                for (int i = 0; i < 3; i++) {
+                    std::cout << ".";
+                    Sleep(300);
+                }
             }
             std::cout << "\x1b[0m\n";
             return false; // Stop the main loop
@@ -144,14 +173,18 @@ void Menu::run() {
             if (selectedItem.isExit) {
                 running = confirmExit();
             } else {
-                system("cls"); // Clear screen for the function's output
-
                 if (selectedItem.action) {
+                    system("cls");
+                    printBoilerplate(); // Inject boilerplate into every sub-page!
+
+                    // Print a header for the specific action being performed
+                    std::cout << "\x1b[33m --- " << selectedItem.text << " ---\x1b[0m\n\n";
+
                     selectedItem.action();
                 }
             }
         } else if (ch >= '1' && ch <= '0' + static_cast<int>(items.size())) {
-            // Numeric shortcut keys (matches your C logic)
+            // Numeric shortcut keys
             currentSelection = ch - '1';
         }
     }
@@ -161,4 +194,17 @@ void Menu::run() {
 void Menu::pause() const {
     std::cout << "\n\x1b[33mPress any key to return to the menu...\x1b[0m";
     _getch();
+}
+
+void enableWindowsColors() {
+#ifdef _WIN32
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    if (hOut != INVALID_HANDLE_VALUE) {
+        DWORD dwMode = 0;
+        if (GetConsoleMode(hOut, &dwMode)) {
+            dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+            SetConsoleMode(hOut, dwMode);
+        }
+    }
+#endif
 }
