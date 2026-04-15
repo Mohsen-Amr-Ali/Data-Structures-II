@@ -182,3 +182,13 @@ int RBT::checkValidity() {
     if (root->color == color::red) return -1;
     return checkValidity(root);
 }
+
+bool RBT::search(std::string key, node *n) {
+    if (n == nil) return false;
+    if (n->key == key) return true;
+    return key < n->key ? search(key, n->left) : search(key, n->right);
+}
+
+bool RBT::search(std::string key) {
+    return search(key, root);
+}
